@@ -34,7 +34,7 @@ gc.collect()  # collect garbage to save memory
 # we are using coloured images.
 nrows = 150
 ncolumns = 150
-channels = 3  # change to 1 if you want to use grayscale image
+channels = 1  # change to 1 if you want to use grayscale image
 
 
 # A function to read and process the images to an acceptable format for our model
@@ -46,22 +46,25 @@ def read_and_process_image(list_of_images):
     """
     X = []  # images
     y = []  # labels
-
+    bgr_images = []
     for image in list_of_images:
         # print("l")
-        X.append(cv2.resize(cv2.imread(image, cv2.IMREAD_COLOR), (nrows, ncolumns),
+        img = (cv2.resize(cv2.imread(image, cv2.IMREAD_COLOR), (nrows, ncolumns),
                             interpolation=cv2.INTER_CUBIC))  # Read the image
+        bgr_img = cv2.cvtColor(img, cv2.COLOR_RGB2BGR)
+        X.append(img)
+        bgr_images.append(bgr_img)
         # get the labels
         if 'dog' in image:
             y.append(1)
         elif 'cat' in image:
             y.append(0)
 
-    return X, y
+    return X, y, bgr_images
 
 
 # get the train and label data
-X, y = read_and_process_image(train_imgs)
+X, y, _ = read_and_process_image(train_imgs)
 
 # Lets view some of the pics
 # plt.figure(figsize=(20, 10))
@@ -108,23 +111,26 @@ from keras import models
 from keras import optimizers
 from keras.preprocessing.image import ImageDataGenerator
 from keras.preprocessing.image import img_to_array, load_img
-
+color_layers = 3
 model = models.Sequential()
-# model.add(layers.Dense(512, activation='relu'))
-model.add(layers.Conv2D(32, (3, 3), activation='relu', input_shape=(nrows, ncolumns, 3)))
-# model.add(layers.Dense(512, activation='relu'))
+model.add(layers.Reshape((nrows, ncolumns, color_layers), input_shape=(nrows, ncolumns, color_layers)))
+exec('model.add(layers.Conv2D(16, (3, 3), activation="relu"))')
+# model.add(layers.Conv2D(16, (3, 3), activation='relu'))
+model.add(layers.MaxPooling2D((2, 2)))
+model.add(layers.Conv2D(32, (3, 3), activation='relu'))
 model.add(layers.MaxPooling2D((2, 2)))
 model.add(layers.Conv2D(64, (3, 3), activation='relu'))
-model.add(layers.Dropout(0.25))
 model.add(layers.MaxPooling2D((2, 2)))
 model.add(layers.Conv2D(128, (3, 3), activation='relu'))
 model.add(layers.MaxPooling2D((2, 2)))
 model.add(layers.Flatten())
-model.add(layers.Dropout(0.25))  # Dropout for regularization
-model.add(layers.Dense(512, activation='relu'))
-# model.add(layers.Dropout(0.25))
+model.add(layers.Dropout(0.5))  # Dropout for regularization
+initial = tensorflow.keras.initializers.RandomNormal(mean=0.5, stddev=0)
+model.add(layers.Dense(512, activation='relu', kernel_initializer=initial))
+# model.add(layers.Dropout(0.5))
 model.add(layers.Dense(1, activation='sigmoid'))  # Sigmoid function at the end because we have just two classes
-
+# Дропаут до плотного слоя: 0.6900
+# Дропаут после плотного слоя: 0.6512
 # Lets see our model
 model.summary()
 
@@ -152,13 +158,13 @@ val_generator = val_datagen.flow(X_val, y_val, batch_size=batch_size)
 # We train for 64 epochs with about 100 steps per epoch
 history = model.fit_generator(train_generator,
                               steps_per_epoch=ntrain // batch_size,
-                              epochs=10,
+                              epochs=1,
                               validation_data=val_generator,
                               validation_steps=nval // batch_size)
 
 # Save the model
-model.save_weights('model_wieghts.h5')
-model.save('model_keras.h5')
+# model.save_weights('model_wieghts.h5')
+# model.save('model_keras.h5')
 
 # lets plot the train and val curve
 # get the details form the history object
@@ -180,7 +186,7 @@ plt.show()
 
 lol = random.randint(0, 5000)
 # Now lets predict on the first 10 Images of the test set
-X_test, y_test = read_and_process_image(test_imgs[lol:lol+10])  # Y_test in this case will be empty.
+_, y_test, X_test = read_and_process_image(test_imgs[lol:lol+10])  # Y_test in this case will be empty.
 x = np.array(X_test)
 test_datagen = ImageDataGenerator(rescale=1. / 255)
 
