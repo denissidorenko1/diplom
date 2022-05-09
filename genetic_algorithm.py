@@ -7,12 +7,12 @@ optimizers = [
     'Adamax',
     'Ftrl',
     'Nadam',
-    'RMSProp',
-    'SGO',
+    'RMSProp', #fine
+    'SGD',
 ]
 
 losses = [
-    'binary_crossentropy',
+    'binary_crossentropy', #fine
     'binary_focal_crossentropy',
     'categorical_crossentropy',
     'categorical_hinge',
@@ -45,18 +45,18 @@ activations = [
     'sigmoid',
     'softmax',
     'softplus',
-    'softsing',
-    'tonh',
+    'softsign',  # чет странное
+    'tanh',
     'selu',
     'elu',
     'exponential',
 ]
 
 poolings = [
-    'MaxPooling2D((2, 2)',
-    'AvgPooling2D((2, 2)',
-    'GlobalAveragePooling2D((2, 2)',
-    'GlobalMaxPooling2D((2, 2)'
+    'MaxPooling2D((2, 2)',  # вроде работает
+    'AveragePooling2D((2, 2)',  # вроде работает
+    # 'GlobalAveragePooling2D((2, 2)', # не работает
+    # 'GlobalMaxPooling2D((2, 2)' # не работает тоже
 ]
 
 
@@ -76,11 +76,11 @@ def create_random_conv_layer():
 def output_conv_layer(layer):
     # model.add(layers.Conv2D(64, (3, 3), activation='relu'))
     # model.add(layers.MaxPooling2D((2, 2)))
-    out = "model.add(layers."+layer['convolution']+str(layer['size'])+", (3, 3), activation='"+layer['activation']+"'))"
+    out = "model.add(layers."+layer['convolution']+str(layer['size'])+", (3, 3), activation='"+layer['activation']+"')) \nmodel.add(layers."+layer['pooling']+"))"
     out2 = "model.add(layers."+layer['pooling']+"))"
     # print(out)
     # print(out2)
-    out = out + "\n" + out2
+    # out = out + "\ " + out2
     # print(out)
     return out
 
@@ -208,10 +208,10 @@ def convert_layer_list(layer_list, compilator):
         else:
             raise Exception
     # print(out)
-    for line in out:
-        print(line)
-    print(comp)
-
+    # for line in out:
+    #     print(line)
+    # print(comp)
+    return [out, comp]
 
 specie = create_specie()
 convert_layer_list(specie[0], specie[1])
