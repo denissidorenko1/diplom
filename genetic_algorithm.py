@@ -188,6 +188,7 @@ def create_specie():
 
     compilator = create_optimizer()
     # print(layer_list)
+
     return [layer_list, compilator]
 
 
@@ -207,11 +208,8 @@ def convert_layer_list(layer_list, compilator):
             out.append(output_output_layer(layer))
         else:
             raise Exception
-    # print(out)
-    # for line in out:
-    #     print(line)
-    # print(comp)
     return [out, comp]
+
 
 specie = create_specie()
 convert_layer_list(specie[0], specie[1])
