@@ -1,3 +1,4 @@
+import time
 
 import cv2
 import numpy as np
@@ -16,7 +17,7 @@ train_cats = ['/Users/denis/PycharmProjects/diplom/input/train/{}'.format(i) for
 test_imgs = ['/Users/denis/PycharmProjects/diplom/input/test/{}'.format(i) for i in os.listdir(test_dir)]  # get test images
 
 print("dogs total {}, cats total {}".format(len(train_dogs), len(train_cats)))
-train_imgs = train_dogs[:500] + train_cats[:500]  # slice the dataset and use 2000 in each class
+train_imgs = train_dogs[:2000] + train_cats[:2000]  # slice the dataset and use 2000 in each class
 random.shuffle(train_imgs)  # shuffle it randomly
 
 # Clear list that are useless
@@ -99,17 +100,31 @@ nval = len(X_val)
 
 # We will use a batch size of 32. Note: batch size should be a factor of 2.***4,8,16,32,64...***
 batch_size = 32
-
-accuracy_list = []
+average_accuracy_list = []
+# accuracy_list = []
 try:
-    for i in range(0, 200):
-        specie = genetic_algorithm.create_specie()
-        payload = genetic_algorithm.convert_layer_list(specie[0], specie[1])
-        accuracy = neural_fitness.fitness(payload=payload, X_train=X_train, X_val=X_val, y_train=y_train, y_val=y_val, epochs=3)
-        specie.clear()
-        payload.clear()
-        accuracy_list.append(accuracy)
+
+    population = genetic_algorithm.create_population(40)
+    for i in range(0, 100):
+        average_cum = 0
+        for specie in population:
+            payload = genetic_algorithm.convert_layer_list(specie['layers'], specie['optimizer'])
+            val_accuracy = neural_fitness.fitness(payload=payload, X_train=X_train, X_val=X_val, y_train=y_train,
+                                                  y_val=y_val, epochs=16)
+
+            payload.clear()
+            time.sleep(20)
+            specie['val_acc'] = val_accuracy
+            average_cum += val_accuracy
+        average_cum /= len(population)
+        average_accuracy_list.append(average_cum)
+        print("population_len: {}".format(len(population)))
+        print("population num: {}, average_accuracy={}".format(i, average_cum))
+        population = genetic_algorithm.crossover(genetic_algorithm.select_half_best(population))
+            # accuracy_list.append(val_accuracy)
+        # print("specie val acc:", specie['val_acc'])
 except KeyboardInterrupt:
     pass
-print(accuracy_list)
-print(max(accuracy_list))
+print(average_accuracy_list)
+# print(accuracy_list)
+# print(max(accuracy_list))
