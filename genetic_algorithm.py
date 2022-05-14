@@ -109,7 +109,7 @@ def create_dense_layer():
     layer = {
         'tag': 'dense_layer',
         'payload': 'Dense(',
-        'parameters': 2 ** random.randint(3, 12),
+        'parameters': 2 ** random.randint(3, 11),
         'activation': activations[random.randint(0, len(activations)-1)]
     }
     return layer
@@ -227,7 +227,7 @@ def convert_layer_list(layer_list, compilator):
 def create_population(population_size=40):
     population = []
     for i in range(0, population_size):
-        population.append(create_specie(test_mode=True))
+        population.append(create_specie(test_mode=False))
     return population
 
 
@@ -245,6 +245,7 @@ def select_half_best(population):
     # for specie in best_species:
         # print("val_acc: ", specie['val_acc'])
     del population
+    del pop_size
     gc.collect()
     return best_species
 
@@ -431,6 +432,7 @@ def breed(male, female):
         'optimizer': kid_2_optimizer,
         'val_acc': 0
     }
+    gc.collect()
     return first, second
 
 
@@ -446,17 +448,18 @@ def crossover(best_species):
         counter -= 1
     # print("best species count:", len(best_species))
     # print("offsprings count:", len(offsprings))
+    gc.collect()
     return offsprings
 
 
-pop = create_population(20)
-kekeke = select_half_best(pop)
+# pop = create_population(20)
+# kekeke = select_half_best(pop)
 # dick, cock =breed(kekeke[0], kekeke[1])
 # print("*"*60)
 # print(dick)
 # print()
 # print(cock)
-crossover(kekeke)
+# crossover(kekeke)
 # specie = create_specie()
 # convert_layer_list(specie['layers'], specie['optimizer']) # this is outdated version which uses list instead of dict
 

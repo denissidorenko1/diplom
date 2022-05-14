@@ -18,7 +18,7 @@ test_imgs = ['/Users/denis/PycharmProjects/diplom/input/test/{}'.format(i) for i
 
 print("dogs total {}, cats total {}".format(len(train_dogs), len(train_cats)))
 train_imgs = train_dogs[:2000] + train_cats[:2000]  # slice the dataset and use 2000 in each class
-random.shuffle(train_imgs)  # shuffle it randomly
+# random.shuffle(train_imgs)  # shuffle it randomly
 
 # Clear list that are useless
 del train_dogs
@@ -102,25 +102,30 @@ nval = len(X_val)
 batch_size = 32
 average_accuracy_list = []
 # accuracy_list = []
+gc.set_threshold(400, 15, 15)
 try:
 
-    population = genetic_algorithm.create_population(40)
-    for i in range(0, 100):
+    population = genetic_algorithm.create_population(8)
+    # time.sleep(100)
+    for i in range(0, 20):
         average_cum = 0
         for specie in population:
             payload = genetic_algorithm.convert_layer_list(specie['layers'], specie['optimizer'])
             val_accuracy = neural_fitness.fitness(payload=payload, X_train=X_train, X_val=X_val, y_train=y_train,
-                                                  y_val=y_val, epochs=16)
+                                                  y_val=y_val, epochs=2)
 
-            payload.clear()
-            time.sleep(20)
+            # payload.clear()
+            del payload
+            # time.sleep(2)
             specie['val_acc'] = val_accuracy
             average_cum += val_accuracy
+            gc.collect()
         average_cum /= len(population)
         average_accuracy_list.append(average_cum)
         print("population_len: {}".format(len(population)))
         print("population num: {}, average_accuracy={}".format(i, average_cum))
         population = genetic_algorithm.crossover(genetic_algorithm.select_half_best(population))
+        gc.collect()
             # accuracy_list.append(val_accuracy)
         # print("specie val acc:", specie['val_acc'])
 except KeyboardInterrupt:
