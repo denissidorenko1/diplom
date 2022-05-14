@@ -8,6 +8,9 @@ import os
 import random
 import gc  # Gabage collector for cleaning deleted data from memory
 import genetic_algorithm, neural_fitness
+
+
+
 train_dir = '/Users/denis/PycharmProjects/diplom/input/train'
 test_dir = '/Users/denis/PycharmProjects/diplom/input/test'
 

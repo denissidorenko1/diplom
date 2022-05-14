@@ -1,8 +1,9 @@
 import gc
 import time
-
+import tensorflow
 from keras import layers
 from keras import models
+from keras import backend
 # from keras import optimizers
 from keras.preprocessing.image import ImageDataGenerator
 # from keras.preprocessing.image import img_to_array, load_img
@@ -62,7 +63,7 @@ def fitness(payload, X_train, X_val, y_train, y_val, epochs=16, nrows=150, ncolu
     #                     validation_steps=nval // batch_size)
 
     history = model.fit_generator(train_generator, steps_per_epoch=ntrain // batch_size, epochs=epochs, validation_data=val_generator, validation_steps=nval // batch_size)
-
+    backend.clear_session()
     print(gc.get_count())
     del model
     del val_datagen
@@ -75,6 +76,6 @@ def fitness(payload, X_train, X_val, y_train, y_val, epochs=16, nrows=150, ncolu
     print(gc.get_count())
     gc.collect()
     print(gc.get_count())
-    time.sleep(10)
+    # time.sleep(10)
     return history.history['val_acc'][-1]
 
